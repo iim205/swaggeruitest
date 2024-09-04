@@ -1,0 +1,82 @@
+openapi: 3.0.3
+info:
+  title: 經費結報管理系統 通用型報支 API 文件
+  version: v1
+  description: |
+    ## 主計總處經費結報管理系統提供開發人員使用 API 自助加值原本中央提供的通用型報支服務。
+    * 開發標準：
+      API 開發標準，依「[共通性應用程式介面指引](https://file.data.gov.tw/content/about/%E5%85%B1%E9%80%9A%E6%80%A7%E6%87%89%E7%94%A8%E7%A8%8B%E5%BC%8F%E4%BB%8B%E9%9D%A2%E6%8C%87%E5%BC%95.pdf)」為設計準則。
+    * 詮釋資料標準：
+      資料集詮釋資料，依「[資料集詮釋資料標準規範](https://file.data.gov.tw/content/%E8%B3%87%E6%96%99%E9%9B%86%E8%A9%AE%E9%87%8B%E8%B3%87%E6%96%99%E6%A8%99%E6%BA%96%E8%A6%8F%E7%AF%84_%E6%A0%B8%E5%AE%9A%E7%89%88_.pdf)」為設計準則。
+
+servers:
+  - url: https://geastest.dgbas.gov.tw/test/oas/
+    description: 經費結報系統 API 測試站
+
+paths:
+  /V1/Auth/OrgCode/{OrgCode}/{IdcardNo}:
+    get:
+      operationId: getFileData
+      summary: 登入確認身分
+      tags:
+        - Auth
+      description: |
+        確認所屬機關之身份是否合法
+
+        * 所屬機關(機構)代碼、身分證字號...。
+
+      parameters:
+        - name: OrgCode
+          in: path
+          description: 所屬機關(機構)代碼：Ex:321000000A
+          required: true
+          schema:
+            type: string
+        - name: IdcardNo
+          in: path
+          description: 身分證字號：Ex:A123456789（**以 base64 加密**）
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: |
+            若驗證成功，服務端會回應 200，並回傳正確的 IdcardNo？
+
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/GEAS.Service.Specification.V1.AuthData'
+              example:
+                OrgCode: 321000000A
+                IdcardNo: A123456789
+        '304':
+          description: 若驗證失敗，服務端會回應 304，並回傳 ErrNo 與對應的 ErrMessage 失敗訊息。
+          content:
+            application/json:
+              example:
+                ErrNo: 1
+                ErrMessage: 錯誤訊息1
+
+components:
+  schemas:
+    GEAS.Service.Specification.V1.AuthData:
+      title: AuthData
+      required:
+        - OrgCode
+        - IdcardNo
+      type: object
+      properties:
+        OrgCode:
+          title: String
+          maxLength: 20
+          type: string
+          description: 所屬機關(機構)代碼
+          xml:
+            name: OrgCode
+        IdcardNo:
+          title: String
+          type: string
+          description: 身分證字號
+          xml:
+            name: IdcardNo
